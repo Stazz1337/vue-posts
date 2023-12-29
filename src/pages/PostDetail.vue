@@ -19,11 +19,21 @@ interface User {
   phone: string;
 }
 
+interface PostResponse {
+  data: Post;
+}
+
+interface UserResponse {
+  data: User;
+}
+
 const route = useRoute();
-const postId = Number(route.params.id);
+const postId = Number(route.params.id) as number;
 
 const post = ref<Post | null>(null);
 const user = ref<User | null>(null);
+
+const userId = sessionStorage.getItem('userId') ? Number(sessionStorage.getItem('userId')) : null;
 
 const myItems = [
   {
@@ -40,19 +50,18 @@ const myItems = [
   },
 ];
 
-const fetchPost = async () => {
+const fetchPost = async (): Promise<void> => {
   try {
-    const { data }: { data: Post } = await axios.get(
-      `https://jsonplaceholder.typicode.com/posts/${postId}`,
-    );
-    post.value = data;
-    const userId = data.userId;
+    const postResponse = axios.get(`https://jsonplaceholder.typicode.com/posts/${postId}`);
+    const userResponse = axios.get(`https://jsonplaceholder.typicode.com/users/${userId}`);
 
-    const { data: userData }: { data: User } = await axios.get(
-      `https://jsonplaceholder.typicode.com/users/${userId}`,
-    );
+    const [postData, userData]: [PostResponse, UserResponse] = await Promise.all([
+      postResponse,
+      userResponse,
+    ]);
 
-    user.value = userData;
+    post.value = postData.data;
+    user.value = userData.data;
   } catch (error) {
     console.log(error);
   }

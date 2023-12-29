@@ -18,6 +18,7 @@ const myItems = [
 ];
 
 interface Post {
+  userId: number;
   id: number;
   title: string;
   body: string;
@@ -25,8 +26,9 @@ interface Post {
 
 const posts = ref<Post[]>([]);
 
-const openPost = (id: number) => {
+const openPost = (id: number, userId: number) => {
   router.push(`/posts/${id}`);
+  sessionStorage.setItem('userId', String(userId));
 };
 
 const deletePost = (id: number) => {
@@ -60,7 +62,7 @@ onMounted(() => {
         class="posts__item"
         v-for="post in posts"
         :key="post.id"
-        @click="openPost(post.id)"
+        @click="openPost(post.id, post.userId)"
         @contextmenu.prevent="deletePost(post.id)">
         <p>#{{ post.id }}</p>
         <h2>{{ post.title }}</h2>
